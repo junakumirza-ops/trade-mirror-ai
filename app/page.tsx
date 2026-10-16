@@ -145,7 +145,7 @@ export default function Home() {
     }
   };
 
-  // 4. Login / Daftar dengan Akun Google
+  // 4. Login dengan Google
   const handleGoogleLogin = async () => {
     setAuthError('');
     try {
@@ -272,7 +272,7 @@ export default function Home() {
     }
   };
 
-  // TAMPILAN JIKA BELUM LOGIN (LOGIN / REGISTER FORM)
+  // TAMPILAN LOGIN / REGISTER
   if (!user && !authLoading) {
     return (
       <div className="flex h-screen bg-[#0B1020] text-[#F4F7FB] items-center justify-center p-4">
@@ -285,7 +285,6 @@ export default function Home() {
             <p className="text-xs text-[#F4F7FB] mt-3 font-semibold">“Lo trading, sistem yang jadi cermin.”</p>
           </div>
 
-          {/* Tombol Login Google */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -376,10 +375,10 @@ export default function Home() {
     );
   }
 
-  // TAMPILAN DASHBOARD SETELAH LOGIN
+  // TAMPILAN UTAMA DASHBOARD
   return (
     <div className="flex h-screen bg-[#0B1020] text-[#F4F7FB] font-sans overflow-hidden">
-      {/* SIDEBAR NAVIGATION */}
+      {/* SIDEBAR */}
       <aside className="w-64 bg-[#10182B] border-r border-[#94A3B8]/10 flex flex-col justify-between p-4 hidden md:flex">
         <div>
           <div className="mb-4 px-2">
@@ -452,9 +451,9 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#172238] p-6 rounded-2xl border border-[#94A3B8]/10 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#F4F7FB]">{activeMenu}</h1>
-            <p className="text-xs text-[#94A3B8] mt-1">Laporan Akun: <span className="text-[#36D6E8] font-bold">{user?.email}</span> • Mode: <span className="text-[#36D6E8] font-bold">{currency}</span></p>
+            <p className="text-xs text-[#94A3B8] mt-1">Laporan Akun: <span className="text-[#36D6E8] font-bold">{user?.email}</span> | Mode: <span className="text-[#36D6E8] font-bold">{currency}</span></p>
           </div>
-          <div className="flex gap-3">
+          <div>
             <button 
               onClick={() => { setEditingId(null); setShowModal(true); }}
               className="bg-[#36D6E8] text-[#0B1020] font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-[#36D6E8]/90 transition flex items-center gap-2"
@@ -464,7 +463,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 1. DASHBOARD */}
         {activeMenu === 'Dashboard' && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -509,7 +507,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 2. TRADE LOG */}
         {activeMenu === 'Trade Log' && (
           <div className="bg-[#172238] p-6 rounded-2xl border border-[#94A3B8]/10">
             <div className="flex justify-between items-center mb-4">
@@ -570,7 +567,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 3. CHART */}
         {activeMenu === 'Chart' && (
           <div className="bg-[#172238] p-4 rounded-2xl border border-[#94A3B8]/10 h-[80vh]">
             <iframe 
@@ -580,7 +576,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 4. CALENDAR */}
         {activeMenu === 'Calendar' && (
           <div className="bg-[#172238] p-4 rounded-2xl border border-[#94A3B8]/10 h-[80vh]">
             <iframe 
@@ -590,12 +585,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* 5. CARA KERJA SYSTEM */}
         {activeMenu === 'Cara Kerja System' && (
           <div className="space-y-6 text-xs text-[#94A3B8]">
             <div className="bg-[#172238] p-6 rounded-2xl border border-[#36D6E8]/30">
               <h2 className="text-base font-bold text-[#36D6E8] mb-3">🔍 Sistem Autentikasi & Database Cloud Supabase</h2>
-              <p className="mb-4">Data jurnal Anda kini secara penuh tersimpan di cloud database PostgreSQL Supabase dengan perlindungan Row Level Security (RLS).</p>
+              <p className="mb-4">Data jurnal Anda kini tersimpan di cloud database PostgreSQL Supabase dengan RLS dalam status UNRESTRICTED.</p>
             </div>
           </div>
         )}
@@ -666,7 +660,7 @@ export default function Home() {
 
                 <div>
                   <label className="block text-[#94A3B8] mb-1">Nilai Profit/Loss</label>
-                  <input type="number" value={form.inputAmount} onChange={e => setForm({...form, inputAmount: e.target.value})} placeholder={form.inputCurrency === 'IDR' ? '200000' : '145'} className="w-full bg-[#10182B] border border-[#94A3B8]/20 rounded-lg p-2 text-[#F4F7FB] outline-none" />
+                  <input type="number" value={form.inputAmount} onChange={e => setForm({...form, inputAmount: e.target.value})} placeholder="145" className="w-full bg-[#10182B] border border-[#94A3B8]/20 rounded-lg p-2 text-[#F4F7FB] outline-none" />
                 </div>
 
                 <div>
@@ -683,16 +677,19 @@ export default function Home() {
                 <label className="block text-[#94A3B8] mb-1">Kondisi Emosi</label>
                 <select value={form.emotion} onChange={e => setForm({...form, emotion: e.target.value})} className="w-full bg-[#10182B] border border-[#94A3B8]/20 rounded-lg p-2 text-[#F4F7FB] outline-none">
                   <option value="Tenang">Tenang</option>
+                  <option value="Disiplin">Disiplin</option>
                   <option value="FOMO">FOMO</option>
-                  <option value="Serakah">Serakah</option>
-                  <option value="Revenge">Revenge</option>
+                  <option value="Geregetan">Geregetan / Revenge</option>
                 </select>
               </div>
 
-              <div className="pt-3 flex justify-end gap-2">
-                <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-[#10182B] text-[#94A3B8] rounded-lg">Batal</button>
-                <button onClick={handleSaveTrade} className="px-5 py-2 bg-[#36D6E8] text-[#0B1020] font-bold rounded-lg">Simpan ke Cloud</button>
-              </div>
+              <button 
+                onClick={handleSaveTrade}
+                type="button" 
+                className="w-full bg-[#36D6E8] text-[#0B1020] font-bold py-2.5 rounded-xl text-xs hover:bg-[#36D6E8]/90 transition mt-4"
+              >
+                {editingId ? 'Simpan Perubahan' : 'Simpan ke Cloud Database'}
+              </button>
             </div>
           </div>
         </div>
