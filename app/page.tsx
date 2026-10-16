@@ -78,7 +78,7 @@ export default function Home() {
     };
   }, []);
 
-  // 2. Fetch Trades (Disesuaikan dengan kolom Supabase Anda)
+  // 2. Fetch Trades
   const fetchTrades = async (userId: string) => {
     setTradesLoading(true);
     const { data, error } = await supabase
@@ -103,6 +103,8 @@ export default function Home() {
         setup: t.setup || 'Breakout'
       }));
       setTrades(mapped);
+    } else if (error) {
+      console.error('Fetch error:', error.message);
     }
     setTradesLoading(false);
   };
@@ -194,8 +196,7 @@ export default function Home() {
     return acc;
   }, []) : [{ date: 'Start', equity: 10000 }];
 
-  // Simpan / Edit Trade (Disesuaikan dengan kolom Supabase Anda)
-  const handleSaveTrade = async () => {// Simpan / Edit Trade (Bebas Error 400 Koma/Titik)
+  // Simpan / Edit Trade
   const handleSaveTrade = async () => {
     if (!user) {
       alert("Silakan login terlebih dahulu!");
@@ -256,64 +257,6 @@ export default function Home() {
       }
     }
 
-    setForm({ pair: 'XAUUSD', position: 'BUY', lot: '0.1', entry: '', sl: '', tp: '', status: 'WIN', inputAmount: '', inputCurrency: 'USD', emotion: 'Tenang', setup: 'Breakout' });
-  };
-    if (!user) return;
-
-    const rawVal = parseFloat(form.inputAmount || '0');
-    let usdValue = rawVal;
-    if (form.inputCurrency === 'IDR') {
-      usdValue = rawVal / 15800;
-    } else if (form.inputCurrency === 'CENT') {
-      usdValue = rawVal / 100;
-    }
-
-    const finalNetPnlUSD = form.status === 'LOSS' ? -Math.abs(usdValue) : Math.abs(usdValue);
-
-    if (editingId) {
-      const { error } = await supabase.from('trades').update({
-        pair: form.pair,
-        position: form.position,
-        lot: parseFloat(form.lot || '0.1'),
-        entry: parseFloat(form.entry || '0'),
-        sl: parseFloat(form.sl || '0'),
-        tp: parseFloat(form.tp || '0'),
-        status: form.status,
-        pnl: finalNetPnlUSD,
-        emotion: form.emotion,
-        setup: form.setup
-      }).eq('id', editingId);
-
-      if (error) {
-        alert('Gagal update: ' + error.message);
-      } else {
-        fetchTrades(user.id);
-      }
-    } else {
-      const { error } = await supabase.from('trades').insert([{
-        user_id: user.id,
-        entry_date: new Date().toISOString(),
-        pair: form.pair,
-        position: form.position,
-        lot: parseFloat(form.lot || '0.1'),
-        entry: parseFloat(form.entry || '0'),
-        sl: parseFloat(form.sl || '0'),
-        tp: parseFloat(form.tp || '0'),
-        status: form.status,
-        pnl: finalNetPnlUSD,
-        emotion: form.emotion,
-        setup: form.setup
-      }]);
-
-      if (error) {
-        alert('Gagal menyimpan: ' + error.message);
-      } else {
-        fetchTrades(user.id);
-      }
-    }
-
-    setShowModal(false);
-    setEditingId(null);
     setForm({ pair: 'XAUUSD', position: 'BUY', lot: '0.1', entry: '', sl: '', tp: '', status: 'WIN', inputAmount: '', inputCurrency: 'USD', emotion: 'Tenang', setup: 'Breakout' });
   };
 
