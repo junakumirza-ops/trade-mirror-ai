@@ -78,7 +78,7 @@ export default function Home() {
     };
   }, []);
 
-  // 2. Fetch Trades
+  // 2. Fetch Trades (Disesuaikan dengan kolom Supabase Anda)
   const fetchTrades = async (userId: string) => {
     setTradesLoading(true);
     const { data, error } = await supabase
@@ -90,17 +90,17 @@ export default function Home() {
     if (!error && data) {
       const mapped = data.map((t: any) => ({
         id: t.id,
-        date: new Date(t.entry_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
-        pair: t.pair,
-        position: t.position,
-        lot: t.lot_size,
-        entry: t.entry_price,
-        sl: t.stop_loss,
-        tp: t.take_profit,
-        status: t.status,
-        netPnlUSD: parseFloat(t.net_pnl),
-        emotion: t.emotion,
-        setup: t.setup
+        date: t.entry_date ? new Date(t.entry_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-',
+        pair: t.pair || 'XAUUSD',
+        position: t.position || 'BUY',
+        lot: t.lot || '0.1',
+        entry: t.entry || 0,
+        sl: t.sl || 0,
+        tp: t.tp || 0,
+        status: t.status || 'WIN',
+        netPnlUSD: parseFloat(t.pnl || '0'),
+        emotion: t.emotion || 'Tenang',
+        setup: t.setup || 'Breakout'
       }));
       setTrades(mapped);
     }
@@ -139,7 +139,7 @@ export default function Home() {
         }
       }
     } catch (err: any) {
-      setAuthError('Gagal terhubung ke server. Pastikan file .env.local terisi URL Supabase yang benar.');
+      setAuthError('Gagal terhubung ke server.');
     } finally {
       setAuthLoading(false);
     }
@@ -194,7 +194,7 @@ export default function Home() {
     return acc;
   }, []) : [{ date: 'Start', equity: 10000 }];
 
-  // Simpan / Edit Trade
+  // Simpan / Edit Trade (Disesuaikan dengan kolom Supabase Anda)
   const handleSaveTrade = async () => {
     if (!user) return;
 
@@ -212,34 +212,42 @@ export default function Home() {
       const { error } = await supabase.from('trades').update({
         pair: form.pair,
         position: form.position,
-        lot_size: parseFloat(form.lot),
-        entry_price: parseFloat(form.entry || '0'),
-        stop_loss: parseFloat(form.sl || '0'),
-        take_profit: parseFloat(form.tp || '0'),
+        lot: parseFloat(form.lot || '0.1'),
+        entry: parseFloat(form.entry || '0'),
+        sl: parseFloat(form.sl || '0'),
+        tp: parseFloat(form.tp || '0'),
         status: form.status,
-        net_pnl: finalNetPnlUSD,
+        pnl: finalNetPnlUSD,
         emotion: form.emotion,
         setup: form.setup
       }).eq('id', editingId);
 
-      if (!error) fetchTrades(user.id);
+      if (error) {
+        alert('Gagal update: ' + error.message);
+      } else {
+        fetchTrades(user.id);
+      }
     } else {
       const { error } = await supabase.from('trades').insert([{
         user_id: user.id,
         entry_date: new Date().toISOString(),
         pair: form.pair,
         position: form.position,
-        lot_size: parseFloat(form.lot),
-        entry_price: parseFloat(form.entry || '0'),
-        stop_loss: parseFloat(form.sl || '0'),
-        take_profit: parseFloat(form.tp || '0'),
+        lot: parseFloat(form.lot || '0.1'),
+        entry: parseFloat(form.entry || '0'),
+        sl: parseFloat(form.sl || '0'),
+        tp: parseFloat(form.tp || '0'),
         status: form.status,
-        net_pnl: finalNetPnlUSD,
+        pnl: finalNetPnlUSD,
         emotion: form.emotion,
         setup: form.setup
       }]);
 
-      if (!error) fetchTrades(user.id);
+      if (error) {
+        alert('Gagal menyimpan: ' + error.message);
+      } else {
+        fetchTrades(user.id);
+      }
     }
 
     setShowModal(false);
