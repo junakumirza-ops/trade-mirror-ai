@@ -195,7 +195,69 @@ export default function Home() {
   }, []) : [{ date: 'Start', equity: 10000 }];
 
   // Simpan / Edit Trade (Disesuaikan dengan kolom Supabase Anda)
+  const handleSaveTrade = async () => {// Simpan / Edit Trade (Bebas Error 400 Koma/Titik)
   const handleSaveTrade = async () => {
+    if (!user) {
+      alert("Silakan login terlebih dahulu!");
+      return;
+    }
+
+    const parseNum = (val: string) => {
+      if (!val) return 0;
+      const cleanVal = val.toString().replace(',', '.');
+      const num = parseFloat(cleanVal);
+      return isNaN(num) ? 0 : num;
+    };
+
+    const rawVal = parseNum(form.inputAmount);
+    let usdValue = rawVal;
+    if (form.inputCurrency === 'IDR') {
+      usdValue = rawVal / 15800;
+    } else if (form.inputCurrency === 'CENT') {
+      usdValue = rawVal / 100;
+    }
+
+    const finalNetPnlUSD = form.status === 'LOSS' ? -Math.abs(usdValue) : Math.abs(usdValue);
+
+    const tradePayload = {
+      user_id: user.id,
+      entry_date: new Date().toISOString(),
+      pair: form.pair || 'XAUUSD',
+      position: form.position || 'BUY',
+      lot: parseNum(form.lot) || 0.1,
+      entry: parseNum(form.entry),
+      sl: parseNum(form.sl),
+      tp: parseNum(form.tp),
+      status: form.status || 'WIN',
+      pnl: finalNetPnlUSD,
+      emotion: form.emotion || 'Tenang',
+      setup: form.setup || 'Breakout'
+    };
+
+    if (editingId) {
+      const { error } = await supabase.from('trades').update(tradePayload).eq('id', editingId);
+
+      if (error) {
+        alert('Gagal update: ' + error.message);
+      } else {
+        fetchTrades(user.id);
+        setShowModal(false);
+        setEditingId(null);
+      }
+    } else {
+      const { error } = await supabase.from('trades').insert([tradePayload]);
+
+      if (error) {
+        alert('Gagal menyimpan: ' + error.message);
+      } else {
+        fetchTrades(user.id);
+        setShowModal(false);
+        setEditingId(null);
+      }
+    }
+
+    setForm({ pair: 'XAUUSD', position: 'BUY', lot: '0.1', entry: '', sl: '', tp: '', status: 'WIN', inputAmount: '', inputCurrency: 'USD', emotion: 'Tenang', setup: 'Breakout' });
+  };
     if (!user) return;
 
     const rawVal = parseFloat(form.inputAmount || '0');
